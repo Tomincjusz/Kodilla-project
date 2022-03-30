@@ -8,12 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
-import org.springframework.web.servlet.function.ServerResponse;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin("*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/tasks")
@@ -22,7 +20,7 @@ public class TaskController {
     private final DbService service;
     private final TaskMapper taskMapper;
 
-    @GetMapping(value = "/tasks")
+    @GetMapping
     public ResponseEntity<List<TaskDto>> getTasks() {
         List<Task> tasks = service.getAllTasks();
         return ResponseEntity.ok(taskMapper.mapToTaskDtoList(tasks));
