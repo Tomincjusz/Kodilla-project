@@ -28,15 +28,15 @@ public class TrelloController {
             System.out.println(trelloBoardDto.getId() + " - " + trelloBoardDto.getName());
             System.out.println("This board contains lists: ");
             trelloBoardDto.getLists().forEach(trelloList ->
-                System.out.println(trelloList.getName() + " - " + trelloList.getId() + " - " + trelloList.isClosed()));
-            });
-        }
-
-        @PostMapping("cards")
-        public CreatedTrelloCard createTrelloCard (@RequestBody TrelloCardDto trelloCardDto){
-            return trelloClient.createNewCard(trelloCardDto);
-        }
+                    System.out.println(trelloList.getName() + " - " + trelloList.getId() + " - " + trelloList.isClosed()));
+        });
     }
+
+    @PostMapping("cards")
+    public CreatedTrelloCard createTrelloCard (@RequestBody TrelloCardDto trelloCardDto){
+        return trelloClient.createNewCard(trelloCardDto);
+    }
+}
 
         /*    trelloBoards.stream()
                   .filter(trelloBoardDto -> (trelloBoardDto.getId() != null) && (trelloBoardDto.getName() != null))
