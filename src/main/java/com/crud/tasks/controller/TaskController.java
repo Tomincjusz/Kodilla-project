@@ -39,7 +39,6 @@ public class TaskController {
         }
         return ResponseEntity.ok().build();
     }
-
     @PutMapping
     public ResponseEntity<TaskDto> updateTask(@RequestBody TaskDto taskDto) {
         Task task = taskMapper.mapToTask(taskDto);

@@ -1,4 +1,4 @@
-package com.crud.tasks.repository;
+package com.crud.tasks.service.repository;
 
 import com.crud.tasks.domain.Task;
 import org.springframework.data.repository.CrudRepository;
