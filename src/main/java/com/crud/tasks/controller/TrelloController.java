@@ -21,6 +21,7 @@ public class TrelloController {
     private final TrelloClient trelloClient;
 
     @GetMapping("boards")
+
     public void getTrelloBoards() {
         List<TrelloBoardDto> trelloBoards = trelloClient.getTrelloBoards();
 
@@ -31,6 +32,7 @@ public class TrelloController {
                     System.out.println(trelloList.getName() + " - " + trelloList.getId() + " - " + trelloList.isClosed()));
         });
     }
+
 
     @PostMapping("cards")
     public CreatedTrelloCard createTrelloCard (@RequestBody TrelloCardDto trelloCardDto){

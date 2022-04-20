@@ -18,6 +18,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 @Component
 @RequiredArgsConstructor
 public class TrelloClient {
@@ -27,8 +29,7 @@ public class TrelloClient {
     private final TrelloConfig trelloConfig;
 
     public List<TrelloBoardDto> getTrelloBoards() {
-        URI url = UriComponentsBuilder
-                .fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/members/" + trelloConfig.getTrelloUserName() + "/boards")
+        URI url = UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/members/" + trelloConfig.getTrelloUserName() + "/boards")
                 .queryParam("key", trelloConfig.getTrelloAppKey())
                 .queryParam("token", trelloConfig.getTrelloToken())
                 .queryParam("fields", "name,id")
@@ -39,15 +40,10 @@ public class TrelloClient {
 
         try {
             TrelloBoardDto[] boardsResponse = restTemplate.getForObject(url, TrelloBoardDto[].class);
-            return Optional.ofNullable(boardsResponse)
-                    .map(Arrays::asList)
-                    .orElse(Collections.emptyList())
-                    .stream()
-                    .filter(p -> Objects.nonNull(p.getId()) && Objects.nonNull(p.getName()))
-                    .collect(Collectors.toList());
+            return Arrays.asList(ofNullable(boardsResponse).orElse(new TrelloBoardDto[0]));
         } catch (RestClientException e) {
             LOGGER.error(e.getMessage(), e);
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
     }
 
