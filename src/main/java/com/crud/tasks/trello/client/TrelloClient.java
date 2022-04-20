@@ -1,54 +1,63 @@
 package com.crud.tasks.trello.client;
 
 import com.crud.tasks.config.TrelloConfig;
-import com.crud.tasks.domain.CreatedTrelloCard;
-import com.crud.tasks.domain.TrelloBoardDto;
-import com.crud.tasks.domain.TrelloCardDto;
+import com.crud.tasks.domain.*;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import java.net.URI;
 import java.util.*;
+import org.slf4j.Logger;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
 
 @Component
 @RequiredArgsConstructor
 public class TrelloClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TrelloClient.class);
-    private final RestTemplate restTemplate;
     private final TrelloConfig trelloConfig;
+    private final RestTemplate restTemplate;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrelloClient.class);
 
     public List<TrelloBoardDto> getTrelloBoards() {
-        URI url = UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/members/" + trelloConfig.getTrelloUserName() + "/boards")
-                .queryParam("key", trelloConfig.getTrelloAppKey())
-                .queryParam("token", trelloConfig.getTrelloToken())
-                .queryParam("fields", "name,id")
-                .queryParam("lists", "all")
-                .build()
-                .encode()
-                .toUri();
+        URI uri = createBoardUrl( "name,id", "all");
 
         try {
-            TrelloBoardDto[] boardsResponse = restTemplate.getForObject(url, TrelloBoardDto[].class);
-            return Arrays.asList(ofNullable(boardsResponse).orElse(new TrelloBoardDto[0]));
+            TrelloBoardDto[] boardResponse = restTemplate.getForObject(uri, TrelloBoardDto[].class);
+            return Optional.ofNullable(boardResponse)
+                    .map(Arrays::asList)
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .filter(p -> Objects.nonNull(p.getId()) && Objects.nonNull(p.getName()))
+                    .collect(Collectors.toList());
         } catch (RestClientException e) {
             LOGGER.error(e.getMessage(), e);
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 
     public CreatedTrelloCard createNewCard(TrelloCardDto trelloCardDto) {
-        URI url = UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/cards")
+        URI uri = createCartUrl(trelloCardDto);
+        return restTemplate.postForObject(uri, null, CreatedTrelloCard.class);
+    }
+
+    private URI createBoardUrl(String fields, String lists) {
+        URI uri = UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/members/" + trelloConfig.getTrelloUserName() + "/boards")
+                .queryParam("key", trelloConfig.getTrelloAppKey())
+                .queryParam("token", trelloConfig.getTrelloToken())
+                .queryParam("fields", fields)
+                .queryParam("lists", lists)
+                .build()
+                .encode()
+                .toUri();
+        return uri;
+    }
+
+    private URI createCartUrl(TrelloCardDto trelloCardDto) {
+        URI uri = UriComponentsBuilder.fromHttpUrl(trelloConfig.getTrelloApiEndpoint() + "/cards")
                 .queryParam("key", trelloConfig.getTrelloAppKey())
                 .queryParam("token", trelloConfig.getTrelloToken())
                 .queryParam("name", trelloCardDto.getName())
@@ -58,7 +67,6 @@ public class TrelloClient {
                 .build()
                 .encode()
                 .toUri();
-
-        return restTemplate.postForObject(url, null, CreatedTrelloCard.class);
+        return uri;
     }
 }
