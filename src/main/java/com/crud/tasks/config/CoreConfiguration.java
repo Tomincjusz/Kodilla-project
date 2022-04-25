@@ -15,7 +15,6 @@ public class CoreConfiguration {
 
     @Bean
     public RestTemplate restTemplate() {
-
         return new RestTemplate();
     }
     @Bean
@@ -26,4 +25,5 @@ public class CoreConfiguration {
                 .paths(PathSelectors.any())
                 .build();
     }
+
 }
